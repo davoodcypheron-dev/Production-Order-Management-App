@@ -105,6 +105,8 @@ app.post('/api/config', (req, res) => {
             currentConfig.use_mock_db = false;
         }
 
+      
+
         fs.writeFileSync(configPath, JSON.stringify(currentConfig, null, 2), 'utf8');
         res.json({ success: true, message: 'Configuration saved successfully. Please restart server if needed.' });
     } catch (error) {
