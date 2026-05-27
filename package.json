@@ -1,0 +1,12 @@
+{
+    "name": "production-order-management-app",
+    "version": "1.0.0",
+    "description": "Full stack production order management app",
+    "main": "index.js",
+    "scripts": {
+        "start": "node scripts/start.js",
+        "install-all": "npm install --prefix server && npm install --prefix client"
+    },
+    "author": "",
+    "license": "ISC"
+}
