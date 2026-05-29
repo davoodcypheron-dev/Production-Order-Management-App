@@ -87,3 +87,10 @@ production-order-management-app/
 
 ### 5. Logout
 - The user can log out at any time using the logout icon in the top header, which clears the session and returns them to the initial authentication screen.
+
+---
+
+## API Documentation
+
+For the complete API references, including detailed request and response payload structures, please refer to [API_DOCUMENTATION.md].
+
