@@ -37,6 +37,7 @@ const Login = () => {
             if (result.success) {
                 localStorage.setItem('nexus_authenticated', 'true');
                 localStorage.setItem('nexus_user', result.user);
+                localStorage.setItem('nexus_user_id', result.userId);
                 toast.success('Login Successful!');
                 setTimeout(() => {
                     setLoading({ state: false, text: '' });

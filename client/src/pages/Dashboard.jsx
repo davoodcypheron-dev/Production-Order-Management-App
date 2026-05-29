@@ -27,13 +27,14 @@ const Dashboard = () => {
     const [excludeConfirm, setExcludeConfirm] = useState({ isOpen: false, itemId: null, branch: null, itemName: '', branchName: '' });
 
     // Add initial loading logic similar to confirming action in old code
-    const [showConfirm, setShowConfirm] = useState(true);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     // Computed data
     const hasSelection = currentSection && currentTrip;
 
     useEffect(() => {
         fetchSections();
+        checkPendingOrders();
     }, []);
 
     const fetchSections = async () => {
@@ -42,6 +43,38 @@ const Dashboard = () => {
             setSections(sections || []);
         } catch (error) {
             toast.error('Failed to load sections. Is DB Server running?');
+        }
+    };
+
+    const checkPendingOrders = async () => {
+        try {
+            const { pendingExist } = await api.checkPendingOrders();
+            setShowConfirm(pendingExist);
+        } catch (error) {
+            console.error('Failed to check pending orders:', error);
+        }
+    };
+
+    const handleGenerateInvoices = async () => {
+        setShowConfirm(false);
+        setLoading({ state: true, text: 'Generating Invoices...' });
+        try {
+            const userId = localStorage.getItem('nexus_user_id');
+            const result = await api.generateInvoices(userId);
+            if (result.success) {
+                toast.success(result.message || 'Invoices generated successfully!');
+                await fetchSections();
+                if (currentSection) {
+                    const { trips } = await api.getTrips(currentSection);
+                    setTrips(trips || []);
+                }
+            } else {
+                toast.error(result.message || 'Failed to generate invoices.');
+            }
+        } catch (error) {
+            toast.error('Failed to generate invoices. Server error.');
+        } finally {
+            setLoading({ state: false, text: '' });
         }
     };
 
@@ -177,11 +210,7 @@ const Dashboard = () => {
                                 Later
                             </button>
                             <button
-                                onClick={() => {
-                                    setShowConfirm(false);
-                                    setLoading({ state: true, text: 'Generating Invoices...' });
-                                    setTimeout(() => setLoading({ state: false, text: '' }), 1000);
-                                }}
+                                onClick={handleGenerateInvoices}
                                 className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg border-none transition-colors">
                                 Generate
                             </button>

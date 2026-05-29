@@ -35,15 +35,23 @@ production-order-management-app/
 
 ## Setup & Installation
 
-**Prerequisites:** Node.js installed on your machine. MySQL Server (optional if relying strictly on Mock Mode).
+**Prerequisites:** Node.js and MySQL Server installed on your machine.
 
-1. **Install Dependencies:**
+1. **Database Setup:**
+   Before running the application, import the database schema and metadata initialization script into your MySQL Server. The SQL setup file is located at [prod_app_db_meta_data.sql](root/MySQL_Assets/prod_app_db_meta_data.sql).
+   
+   Import the script via your MySQL CLI tool or database explorer (this creates the database `prod_app` and all tables/data):
+   ```bash
+   mysql -u root -p < MySQL_Assets/prod_app_db_meta_data.sql
+   ```
+
+2. **Install Dependencies:**
    From the root folder, run the global installation command to install both frontend and backend dependencies at once:
    ```bash
    npm run install-all
    ```
 
-2. **Start the Application:**
+3. **Start the Application:**
    Run the following command in the root folder to boot both the server (Port 5000) and the client (Vite network port):
    ```bash
    npm start

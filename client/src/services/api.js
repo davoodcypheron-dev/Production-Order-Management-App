@@ -60,5 +60,19 @@ export const api = {
             body: JSON.stringify({ section, itemId, currentTrip, branch })
         });
         return response.json();
+    },
+
+    checkPendingOrders: async () => {
+        const response = await fetch(`${API_BASE_URL}/orders/check-pending`);
+        return response.json();
+    },
+
+    generateInvoices: async (userId) => {
+        const response = await fetch(`${API_BASE_URL}/orders/generate-invoices`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+        });
+        return response.json();
     }
 }

@@ -29,6 +29,21 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+app.get('/api/orders/check-pending', async (req, res) => {
+    const result = await db.checkPendingOrders();
+    res.json(result);
+});
+
+app.post('/api/orders/generate-invoices', async (req, res) => {
+    const { userId } = req.body;
+    const result = await db.generateInvoices(userId);
+    if (result.success) {
+        res.json(result);
+    } else {
+        res.status(500).json(result);
+    }
+});
+
 app.get('/api/sections', async (req, res) => {
     const sections = await db.getSections();
     res.json({ sections });
