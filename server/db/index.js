@@ -4,8 +4,10 @@ const path = require('path');
 const mock_db = require('./mock_db');
 const mysql_db = require('./mysql_db');
 
-// Read the configuration to decide which DB service to use
-const configPath = path.join(__dirname, '../db_config.json');
+const isPackaged = typeof process.pkg !== 'undefined';
+const configPath = isPackaged 
+    ? path.join(path.dirname(process.execPath), 'db_config.json') 
+    : path.join(__dirname, '../db_config.json');
 
 function getDBService() {
     try {

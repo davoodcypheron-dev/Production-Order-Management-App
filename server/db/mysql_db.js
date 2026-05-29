@@ -1,11 +1,26 @@
 const mysql = require('mysql2/promise');
-const configData = require('../db_config.json');
+const fs = require('fs');
+const path = require('path');
+
+const isPackaged = typeof process.pkg !== 'undefined';
+const configPath = isPackaged 
+    ? path.join(path.dirname(process.execPath), 'db_config.json') 
+    : path.join(__dirname, '../db_config.json');
 
 // Global connection pool
 let pool = null;
 
 async function getPool() {
     if (!pool) {
+        let configData;
+        try {
+            const rawConfig = fs.readFileSync(configPath, 'utf8');
+            configData = JSON.parse(rawConfig);
+        } catch (error) {
+            console.error("Failed to read database configuration from:", configPath, error);
+            throw new Error("Database configuration not found or invalid");
+        }
+
         pool = mysql.createPool({
             host: configData.config.host,
             user: configData.config.user,

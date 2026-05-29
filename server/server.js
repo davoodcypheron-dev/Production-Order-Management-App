@@ -9,6 +9,37 @@ const mysql = require('mysql2/promise');
 // Load env vars if any
 dotenv.config();
 
+// Determine db_config.json path and copy template if needed before DB is initialized
+const isPackaged = typeof process.pkg !== 'undefined';
+const configPath = isPackaged 
+    ? path.join(path.dirname(process.execPath), 'db_config.json') 
+    : path.join(__dirname, 'db_config.json');
+
+if (isPackaged && !fs.existsSync(configPath)) {
+    try {
+        const defaultTemplatePath = path.join(__dirname, 'db_config.json');
+        if (fs.existsSync(defaultTemplatePath)) {
+            fs.copyFileSync(defaultTemplatePath, configPath);
+            console.log('📝 Created default db_config.json at', configPath);
+        } else {
+            const defaultConfig = {
+                use_mock_db: false,
+                config: {
+                    host: "localhost",
+                    port: 3306,
+                    user: "root",
+                    password: "admin@5555",
+                    database: "prod_app"
+                }
+            };
+            fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2), 'utf8');
+            console.log('📝 Created default configuration file at', configPath);
+        }
+    } catch (err) {
+        console.error('⚠️ Failed to initialize default db_config.json:', err);
+    }
+}
+
 // Determine Database service (Mock vs MySQL)
 const db = require('./db');
 
@@ -94,7 +125,6 @@ app.post('/api/orders/exclude', async (req, res) => {
 
 app.post('/api/config', (req, res) => {
     try {
-        const configPath = path.join(__dirname, 'db_config.json');
 
         // Read existing structure
         let currentConfig = { use_mock_db: true, config: {} };
@@ -152,11 +182,27 @@ app.post('/api/test-db', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 5000;
-const HOST = process.env.HOST || "localhost";
+// Serve static client assets if client/dist exists
+const clientDistPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDistPath)) {
+    console.log(`📂 Serving static frontend from: ${clientDistPath}`);
+    app.use(express.static(clientDistPath));
+    app.get('/{*splat}', (req, res, next) => {
+        // Fall through to API 404 if it's an API route
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
+        res.sendFile(path.join(clientDistPath, 'index.html'));
+    });
+}
 
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 5000;
+const HOST = '0.0.0.0'; // Listen on all interfaces to allow local network devices to connect
+
+app.listen(PORT, HOST, () => {
     console.log(`\n================================`);
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🚀 Locally accessible at: http://localhost:${PORT}`);
+    console.log(`🚀 Access from other devices: http://<your-host-ip-address>:${PORT}`);
     console.log(`================================`);
 });
